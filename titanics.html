@@ -49,12 +49,114 @@
 									</p>
 								</header>
 								<!-- <div class="image main"><img src="images/pic01.jpg" alt="" /></div> -->
-								<p>In this analysis, I broke it down into data cleaning, data visualizations and modeling. Before diving into an analysis, I would suggest choosing evaluation metrics based on business objectives, and I always choose a evaluation metrics before modeling so I can pick the optimal model using that. 
-								 Since this was a Kaggle competition and the evaluation metrics was Accuracy, I focused on getting the best model with highest accuracy score.
+								<p>In this analysis, I break it down into data cleaning, data visualizations and modeling. I always choose a evaluation metrics before modeling so I can pick the optimal model using that. 
+								 Since this is a Kaggle competition and the evaluation metrics is Accuracy, I focus on getting the best model with highest accuracy score.
 								</p>
 
+								<h3>Exploratory Data Analysis</h3>
+								<p>First, let's take a look at the dataset and understand the data types of variables, by doing this, we will know how should we re-encode /transform / visualize our data. </p>
+								<img src="images/data_overview.jpg" alt="data overview image">
+								<p> 
+								<ul>
+								  <li>PassengerID: it's the identifier for passengers, we don't need it when modeling, this column can be dropped</li>
+								  <li>Survived: this is our response variable, 1 indicates survival and 0 otherwise</li>
+								  <li>Pclass: Pclass represents ticket class with 1 = 1st, 2 = 2nd and 3 =3rd. It's a ordinal categorical variable</li>
+								  <li>Name: Passenger name, we can use it for feature engineer later</li>
+								  <li>Sex: Passenger's gender, its a nominal categorical variable</li>
+								  <li>Age: continuous numerical variable</li>
+								  <li>Sibsp: number of siblings/ spouses aboard the Titanic. It's discrete numerical variable</li>
+								  <li>Parch: number of parents/children aboard the Titanic. same as above</li>
+								  <li>Ticket: ticket number, we can take a look at this variable and see if it helps with generating new features</li>
+								  <li>Fare: continous numerical variable</li>
+								  <li>Cabin: Cabin number; </li>
+								  <li>Embarked:Port of embarkation (C = Cherbourg, Q = Queenstown, S = Southampton). Not sure if its nominal/ordinal right now, we can tell from EDA </li>
+								 
+								</ul>
+								<h4>Age</h4>
+								Histogram is a robust way to visulize the distribution of numerical data: each bar groups numbers into ranges. Taller bars show that more data fell in that range, it displays the shape and spread of continuous data, I will use it as numerical variable visualizations.							
+								</p>
+								<img src="images/age.jpg" alt="fail to load image">
+								<img src="images/his_age.jpg" alt="fail to load image">
+								<img src="images/pclass_age.jpg" alt="fail to load image">
+								<li>75% of ppl within the age range of 0-40 and age is skewed</li>
+								<li>0-14 , and 80 have higher survival rate</li>
+								<li>16 -44 survival rate is comparatively lower than younger and older people</li>
+								<li>177 individuals have missing age</li>
+								<li>The graph of Pclass * Age shows young people tend to be at Pclass =3 and it's clearly an association between passengers' age and their Pclass, we can use Pclass to impute missing age </li> </br>
+							
 
-								<p>Lorem ipsum dolor sit amet, consectetur adipiscing elit. Duis dapibus rutrum facilisis. Class aptent taciti sociosqu ad litora torquent per conubia nostra, per inceptos himenaeos. Etiam tristique libero eu nibh porttitor fermentum. Nullam venenatis erat id vehicula viverra. Nunc ultrices eros ut ultricies condimentum. Mauris risus lacus, blandit sit amet venenatis non, bibendum vitae dolor. Nunc lorem mauris, fringilla in aliquam at, euismod in lectus. Pellentesque habitant morbi tristique senectus et netus et malesuada fames ac turpis egestas. In non lorem sit amet elit placerat maximus. Pellentesque aliquam maximus risus. Donec eget ex magna. Interdum et malesuada fames ac ante ipsum primis in faucibus. Pellentesque venenatis dolor imperdiet dolor mattis sagittis. Praesent rutrum sem diam, vitae egestas enim auctor sit amet. Pellentesque leo mauris, consectetur id ipsum.</p>
+								<h4>Fare</h4>
+								<li>75% passengers pay fare at fairly lower price (0-31)</li>
+								<li>Passengers paid higher fare have higher survival rate</li>
+								<li>Fare is highly skewed, I would like to apply log-transformation to it</li>
+								<img src="images/fare.jpg" alt="fail to load image">
+								<img src="images/his_fare.jpg" alt="fail to load image"></br>
+
+								<h4>Parch and SipSp</h4>
+								We can generate two new columns: is_alone and family_cnt. </br>
+								<li><b>is_alone</b> measures whether the passenger is traveling alone (Y: passengers have 0 SibSp and 0 Parch, N: traveling with family)</li>
+								<li><b>family_cnt</b> measures number of family member traveling with the passenger. I will use the summation of SibSp and Parch to compute it.</li> </br>
+
+								<h4>Embarked * Pclass * Sex</h4>
+								<li>Female have higher survival rate than male across all Embarked</li>
+								<li>Passengers who embared at C (Cherbourg) have higher survival rate. we should re-encode embark using 1,2,3 based on survival rate. C:1, Q:2, S: 3</li>
+								So I will add Sex and embarked to model training and re-encode embark to 1,2,3.
+								<img src="images/embark_class.jpg" alt="fail to load image">
+								<img src="images/embark.jpg" alt="fail to load image">
+
+							</section>
+							<section>
+								<h3>Feature Engineering and Impute missing values</h3>
+								After the EDA, I will impute missing values and perform feature engineering. As I've mentioned above, <b>age</b> is assoicated with Pclass, we can tell younger users tend to be in 3rd class, so I will use each Pclass's mean to impute age. 
+								<b>I will use mode to impute missing's embarked as it's one of the common imputation methods.</b>
+
+								After a glance at <b>Name</b>, I will create a new feature <b>Title</b> from it. i.e. extracting 'Mr' from 'Braund, Mr. Owen Harris'.
+								<b>is_alone</b> and <b>family_cnt</b> are created based on SibSp and Parch.
+								<!-- <img src="images/data2.jpg" alt="fail to load image"> -->
+
+								<figure>
+									<img src="images/data2.jpg" alt="fail to load image" style="width:100%">
+									<figcaption>Data snapshot after transformation</figcaption>
+								</figure> <br></br>
+
+								<h4>Variable encoding</h4>
+								In this section, I will re-encode categorical variables and transform fare. Most of machine learning (i.e Logistics regression) can't take care dataset without properly encoding. I will apply <b>one-hot-encoding</b> to nominal categorical variables as they are unordered. <b>Integer encoding</b> should be applied to ordinal categorical variables.
+
+								<figure>
+									<img src="images/data_encode.jpg" alt="fail to load image" style="width:100%">
+									<figcaption>Data snapshot after encoding</figcaption>
+								</figure>  
+
+							</section>
+
+							<section>
+
+							<h3>Modeling</h3>
+							In this section, I will split the dataset into training and testing set. Training set will be used for cross validation, hyper-parameter tuning and I will only use test set in the end to prevent overfitting.</br>
+
+							I first fit the training data into different models and see its accuracy score. XGBoost has highest test accuracy mean 81.6%, so I will choose this as my main model, and perform hyper-parameter tuning. 
+							<img src="images/model_compare.jpg" alt="fail to load image" style="width:100%">
+
+							<h4>Determine a baseline accuracy</h4>
+							Before we decide how-to make our model better, let's determine if our model is even worth keeping. To do that, we have to go back to the basics of data science 101. We know this is a binary problem, because there are only two possible outcomes; passengers survived or died. So, think of it like a coin flip problem. If you have a fair coin and you guessed heads or tail, then you have a 50-50 chance of guessing correct. So, let's set 50% as the worst model performance; because anything lower than that, then why do I need you when I can just flip a coin?
+
+Okay, so with no information about the dataset, we can always get 50% with a binary problem. But we have information about the dataset, so we should be able to do better. We know that 1,502/2,224 or 67.5% of people died. Therefore, if we just predict the most frequent occurrence, that 100% of people died, then we would be right 67.5% of the time. So, let's set 68% as bad model performance, because again, anything lower than that, then why do I need you, when I can just predict using the most frequent occurrence. </br>
+
+
+							<h4>Hyper-parameter tuning</h4>
+							I will use grid-search to find the optimal paramter for XGBoost. Since the Accuracy of the un-tuned model is already high, I will not spend too much time on this part. 
+							<img src="images/grid-search.jpg" alt="fail to load image" style="width:100%">
+
+							As a result, our model reaches 85% in accuracy.
+
+
+
+
+
+
+
+
+
 							</section>
 
 
